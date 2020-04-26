@@ -1,9 +1,10 @@
 const fs = require("fs");
 const inquirer = require("inquirer");
+const connector = require("./utils/api.js");
 const markDown = require("./utils/generateMarkdown.js");
 
-function promptUser(){
-    return inquirer.prompt([
+
+const questions = [
         {
             type: "input",
             name: "username",
@@ -35,10 +36,10 @@ function promptUser(){
         },
 
         {
-            // What type should this be
-            type: "",
+            type: "list",
             name: "license",
-            message: "What kind of license will be needed to use this project?"
+            message: "What kind of license will be needed to use this project?",
+            choices:["MIT", "Apachi2.0", "GPL 3.0", "ESD3", "None"]
         },
 
         {
@@ -64,17 +65,20 @@ function promptUser(){
             name: "contributing",
             message: "What does your user need to know to be able to contribute to this repo?"
         },
-    ])
-};
+    ];
 
 function writeToFile(fileName, data) {
+    fs.writeFileSync(fileName, data)
 }
 
 function init() {
 inquirer.prompt(questions).then(userResponses => {
-    console.log("searching...")
+    
+    connector.getInfo(userResponses.username).then(function(data){
+        writeToFile("readme.md", markDown(userResponses))
+        console.log("Successfully created file")
+    });
 })
-
 }
 
 init();
